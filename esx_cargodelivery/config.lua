@@ -5,13 +5,14 @@ Config.CopsScaleReward			= true
 --Hash of the npc ped. Change only if you know what you are doing.
 Config.NPCHash					= 349680864 			
 
-Config.LastDelivery 			= 0.0
-
+--Random time societies will get alerted. This is a range in seconds.
 Config.AlertCopsDelayRangeStart	= 60
 Config.AlertCopsDelayRangeEnd	= 70
 
-Config.AlertExtraSocieties 		= { "mafia", "bikers" }
+--If you want to notify more societies add them here. example { "mafia", "bikers" }
+Config.AlertExtraSocieties 		= { }
 
+--Self Explained
 Config.CargoProviderLocation	= { x = 483.6, y = -3382.69, z = 5.1, h = 355.02 }
 
 
@@ -23,7 +24,6 @@ Config.CargoDeliveryLocations 	= {
 		{ x = 97.24, y = 3739.86, z = 38.8}
 
 }
-
 
 
 Config.Scenarios = {

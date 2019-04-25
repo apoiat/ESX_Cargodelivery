@@ -1,18 +1,27 @@
 # esx_cargodelivery
-Fivem ESX Cargo delivery missions.
 
-Requirements
-Auto mode
+### Requirements
+* ESX Police job
+  * [esx_policejob](https://github.com/ESX-Org/esx_policejob)
 
-esx_billing
-Player management (boss actions and armory with buyable weapons)
+## Download & Installation
 
-esx_society
-esx_datastore
-ESX Identity Support
+### Using Git
+```
+cd resources
+git clone https://github.com/apoiat/esx_cargodelivery [esx]/esx_cargodelivery
+```
 
-esx_identity
-ESX License Support
+### Manually
+- Download https://github.com/apoiat/esx_cargodelivery/archive/master.zip
+- Put it in the `[esx]` directory
 
-esx_license
-Download & Installation
+
+## Installation
+- Add this in your server.cfg :
+
+```
+start esx_cargodelivery
+```
+-  * If you want to notify more societies add them at Config.AlertExtraSocieties.
+	 example: Config.AlertExtraSocieties = { "mafia", "bikers" }
