@@ -3,6 +3,7 @@
 ### Requirements
 * ESX Police job
   * [esx_policejob](https://github.com/ESX-Org/esx_policejob)
+  * [GCPhone](https://github.com/N3MTV/gcphone) (for the text messages to work)
 
 ## Download & Installation
 
