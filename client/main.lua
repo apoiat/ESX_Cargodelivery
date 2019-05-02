@@ -141,7 +141,7 @@ Citizen.CreateThread(function()
 							DisplayMissionFailed('Cargo was seriously damaged.')
 						end
 
-						if event_time_passed > 300 then
+						if event_time_passed > 1800 then
 							ResetCargo()
 							DisplayMissionFailed('Cargo Delivery expired.')
 						end

@@ -1,5 +1,4 @@
 Config                        	= {}
---Config.MinCopsOnline			= 2  -- use 0 to disable cop count check
 Config.CopsScaleReward			= true
 
 --Hash of the npc ped. Change only if you know what you are doing.
