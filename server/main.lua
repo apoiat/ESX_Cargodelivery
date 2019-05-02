@@ -20,6 +20,16 @@ function GetCopsOnline()
 	return PoliceConnected
 end
 
+
+
+RegisterServerEvent('esx_cargodelivery:resetEvent')
+AddEventHandler('esx_cargodelivery:resetEvent', function()
+	LastDelivery = 0.0
+end)
+
+
+
+
 ESX.RegisterServerCallback('esx_cargodelivery:getCopsOnline', function(source, cb)
 	cb(GetCopsOnline())
 end)
@@ -31,7 +41,6 @@ end)
 
 ESX.RegisterServerCallback('esx_cargodelivery:sellCargo', function(source, cb, price)
 	local xPlayer = ESX.GetPlayerFromId(source)
-	print(":: Trying to give  " .. price .. " money fo")
 	--local license = Config.LicensePrices[licenseName]
 
 	--xPlayer.addAccountMoney('black_money', amount)

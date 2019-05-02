@@ -2,6 +2,7 @@ ESX = nil
 local PlayerData = {}
 
 event_is_running = false
+event_time_passed = 0.0
 event_destination = nil
 event_vehicle = nil
 event_scenario = nil
@@ -32,7 +33,7 @@ Citizen.CreateThread(function()
 		SetBlipAsShortRange(blip, true)
 
 		BeginTextCommandSetBlipName("STRING")
-		AddTextComponentString(_U('Cargo Provider'))
+		AddTextComponentString('Cargo Provider')
 		EndTextCommandSetBlipName(blip)
 end)
 
@@ -122,6 +123,35 @@ Citizen.CreateThread(function()
 end)
 
 
+
+-- CANCEL CHECK IN CASE PLAYER DIED OR VEHICLE DESTROYED.
+
+Citizen.CreateThread(function()
+	while true do
+		Citizen.Wait(5000)
+				if event_is_running then
+
+						if IsPedDeadOrDying(GetPlayerPed(-1)) then
+							ResetCargo()
+							DisplayMissionFailed('You died!')
+						end
+
+						if GetVehicleEngineHealth(event_vehicle) < 20 and event_vehicle ~= nil then
+							ResetCargo()
+							DisplayMissionFailed('Cargo was seriously damaged.')
+						end
+
+						if event_time_passed > 300 then
+							ResetCargo()
+							DisplayMissionFailed('Cargo Delivery expired.')
+						end
+
+						event_time_passed = event_time_passed + 5
+				end
+		end
+end)
+
+
 function DrawProviderBlip()
 
 	local blip = AddBlipForCoord(Config.CargoProviderLocation.x, Config.CargoProviderLocation.y, Config.CargoProviderLocation.z)
@@ -172,26 +202,30 @@ function AlertThePolice()
 	local playerPed = PlayerPedId()
 	PedPosition		= GetEntityCoords(playerPed)
 	
-	local vehicle_plate = string.char(math.random(65, 90), math.random(65, 90), math.random(65, 90)) .. " " .. math.random(100,999)
+	if event_is_running then
+		
+		local vehicle_plate = string.char(math.random(65, 90), math.random(65, 90), math.random(65, 90)) .. " " .. math.random(100,999)
 
-	SetVehicleNumberPlateText(event_vehicle, vehicle_plate)
+		SetVehicleNumberPlateText(event_vehicle, vehicle_plate)
 	
-	local PlayerCoords = { x = PedPosition.x, y = PedPosition.y, z = PedPosition.z }
 
-    TriggerServerEvent('esx_addons_gcphone:startCall', 'police', ":anon: Eyes on the Prize! Ipopto oxima me pinakida [ " .. vehicle_plate .. " ] anevenei voria!", PlayerCoords, {
+		local PlayerCoords = { x = PedPosition.x, y = PedPosition.y, z = PedPosition.z }
 
-		PlayerCoords = { x = PedPosition.x, y = PedPosition.y, z = PedPosition.z },
-	})
+    	TriggerServerEvent('esx_addons_gcphone:startCall', 'police', ":anon: Eyes on the Prize! Ipopto oxima me pinakida [ " .. vehicle_plate .. " ] anevenei voria!", PlayerCoords, {
 
-    for i = 1, #Config.AlertExtraSocieties do
-
-    if PlayerData.job.name ~= Config.AlertExtraSocieties[i] then
-    	
-    	TriggerServerEvent('esx_addons_gcphone:startCall', Config.AlertExtraSocieties[i], ":anon: Eyes on the Prize! Ipopto oxima me pinakida [ " .. vehicle_plate .. " ] anevenei voria!", PlayerCoords, {
 			PlayerCoords = { x = PedPosition.x, y = PedPosition.y, z = PedPosition.z },
 		})
 
-	end
+    	for i = 1, #Config.AlertExtraSocieties do
+
+    		if PlayerData.job.name ~= Config.AlertExtraSocieties[i] then
+    	
+    			TriggerServerEvent('esx_addons_gcphone:startCall', Config.AlertExtraSocieties[i], ":anon: Eyes on the Prize! Ipopto oxima me pinakida [ " .. vehicle_plate .. " ] anevenei voria!", PlayerCoords, {
+				PlayerCoords = { x = PedPosition.x, y = PedPosition.y, z = PedPosition.z },
+				})
+
+			end
+		end
 	end
 
 
@@ -213,6 +247,24 @@ function CloseMenu()
 		Menu.hidden = true
 end
 
+function ResetCargo()
+
+	TriggerServerEvent('esx_cargodelivery:resetEvent')
+	SetEntityAsNoLongerNeeded(event_vehicle)
+	SetEntityAsMissionEntity(event_vehicle,true,true)
+	DeleteEntity(event_vehicle)
+
+	RemoveBlip(event_delivery_blip)
+	event_delivery_blip	= nil
+	event_time_passed = 0.0
+	event_is_running = false
+	event_destination = nil
+	event_vehicle = nil
+	event_scenario = nil
+	police_alerted = false
+	local talktodealer = true
+
+end
 
 function DeliverCargo()
 
@@ -233,6 +285,7 @@ function DeliverCargo()
 	
 	event_is_running = false
 	event_destination = nil
+	event_time_passed = 0.0
 	event_vehicle = nil
 	event_scenario = nil
 	police_alerted = false
@@ -344,3 +397,14 @@ function PurchaseCargo(scenario)
 end
 
 
+
+function DisplayMissionFailed(label)
+
+	TriggerEvent('esx:showNotification', '~r~Mission Failed: ~w~' .. label)
+	PlaySound(-1, "Menu_Accept", "Phone_SoundSet_Default", 0, 0, 1)
+    Citizen.Wait(300)
+    PlaySound(-1, "Menu_Accept", "Phone_SoundSet_Default", 0, 0, 1)
+    Citizen.Wait(300)
+    PlaySound(-1, "Menu_Accept", "Phone_SoundSet_Default", 0, 0, 1)
+
+end
