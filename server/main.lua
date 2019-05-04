@@ -41,10 +41,17 @@ end)
 
 ESX.RegisterServerCallback('esx_cargodelivery:sellCargo', function(source, cb, price)
 	local xPlayer = ESX.GetPlayerFromId(source)
-	--local license = Config.LicensePrices[licenseName]
 
-	--xPlayer.addAccountMoney('black_money', amount)
-	xPlayer.addAccountMoney('black_money', price)
+	if Config.UsesBlackMoney then
+	
+		xPlayer.addAccountMoney('black_money', price)
+	
+	else
+
+		xPlayer.addMoney(price)
+
+	end
+	
 	TriggerClientEvent('esx:showNotification', source, "You eanred ~r~" .. price .. "~w~ for delivering the cargo.")
 	cb(true)
 
@@ -60,8 +67,6 @@ ESX.RegisterServerCallback('esx_cargodelivery:buyCargo', function(source, cb, pr
 	
 	local xPlayer = ESX.GetPlayerFromId(source)
 
-	
-	--if os.time() < police_alarm_time
 	if (os.time() - LastDelivery) < 200.0 and LastDelivery ~= 0.0 then
 
 		TriggerClientEvent('esx:showNotification', source, "Delivery in progress")
@@ -71,19 +76,38 @@ ESX.RegisterServerCallback('esx_cargodelivery:buyCargo', function(source, cb, pr
 
 		police_alarm_time = os.time() + math.random(10000, 20000)
 
-		if xPlayer.getAccount('black_money').money >= price then
-		--if xPlayer.getMoney() >= price then
-			--xPlayer.removeMoney(price)
-			xPlayer.removeAccountMoney('black_money', price)
+		if Config.UsesBlackMoney then
 
-			LastDelivery = os.time()
+			if xPlayer.getAccount('black_money').money >= price then
 
-			cb(true)
-		else
+				xPlayer.removeAccountMoney('black_money', price)
 
-			TriggerClientEvent('esx:showNotification', source, "Not enough ~r~black money~w~.")
+				LastDelivery = os.time()
+
+				cb(true)
+			else
+
+				TriggerClientEvent('esx:showNotification', source, "Not enough ~r~black money~w~.")
 	
-			cb(false)
+
+				cb(false)
+			end
+
+		else 
+
+				if xPlayer.getMoney() >= price then
+
+				xPlayer.removeMoney(price)
+
+				LastDelivery = os.time()
+
+				cb(true)
+			else
+
+				TriggerClientEvent('esx:showNotification', source, "Not enough ~r~money~w~.")
+	
+				cb(false)
+			end
 		end
 
 	end

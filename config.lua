@@ -1,6 +1,9 @@
 Config                        	= {}
 Config.CopsScaleReward			= true
 
+-- Change this to false if you want clean / legit money
+Config.UsesBlackMoney			= true
+
 --Hash of the npc ped. Change only if you know what you are doing.
 Config.NPCHash					= 349680864 			
 
