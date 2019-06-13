@@ -86,7 +86,6 @@ Citizen.CreateThread(function()
 		Citizen.Wait(5)
 		
 		local pos = GetEntityCoords(GetPlayerPed(-1), false)
-		local pVehicle = GetVehiclePedIsUsing(GetPlayerPed(-1))
 		local v = Config.CargoProviderLocation 
 			if(Vdist(v.x, v.y, v.z, pos.x, pos.y, pos.z) < 2.0)then
 				DisplayHelpText("Press ~INPUT_CONTEXT~ to interact with ~y~Cargo Dealer")
@@ -105,8 +104,10 @@ Citizen.CreateThread(function()
 
 			if event_is_running then
 
-				if pVehicle == event_vehicle then
+				local pVehicle = GetVehiclePedIsUsing(GetPlayerPed(-1))
 
+				if pVehicle == event_vehicle then
+					DrawDeliveryBlip()
 					local dpos = event_destination
 					local delivery_point_distance = Vdist(dpos.x, dpos.y, dpos.z, pos.x, pos.y, pos.z)
 					if delivery_point_distance < 50.0 then
@@ -116,6 +117,7 @@ Citizen.CreateThread(function()
 						end
 					end
 				else 
+					RemoveDeliveryBlip()
 					 DrawMissionText("Get back inside the vehicle!", 1000)
 				end
 			end
@@ -151,6 +153,27 @@ Citizen.CreateThread(function()
 		end
 end)
 
+function DrawDeliveryBlip()
+	if event_delivery_blip == nil then
+		event_delivery_blip	 = AddBlipForCoord(event_destination.x,event_destination.y,event_destination.z)
+		SetBlipSprite(event_delivery_blip,94)
+		SetBlipColour(event_delivery_blip,1)
+		BeginTextCommandSetBlipName("STRING")
+		AddTextComponentString('Cargo Delivery')
+		EndTextCommandSetBlipName(event_delivery_blip)
+		SetBlipAsShortRange(event_delivery_blip,true)
+		SetBlipAsMissionCreatorBlip(event_delivery_blip,true)
+		SetBlipRoute(event_delivery_blip, 1)
+	end
+end
+
+function RemoveDeliveryBlip()
+	if event_delivery_blip ~= nil then
+
+		RemoveBlip(event_delivery_blip)
+
+	end
+end
 
 function DrawProviderBlip()
 
@@ -272,7 +295,7 @@ function DeliverCargo()
 			if sold then
 
 			end
-			end, Config.Scenarios[event_scenario].CargoReward)
+			end)
 		
 	local vehicle = GetVehiclePedIsUsing(GetPlayerPed(-1))
 
@@ -280,7 +303,7 @@ function DeliverCargo()
 	SetEntityAsMissionEntity(vehicle,true,true)
 	DeleteEntity(vehicle)
 
-	RemoveBlip(event_delivery_blip)
+	if event_delivery_blip ~= nil then RemoveBlip(event_delivery_blip) end
 	event_delivery_blip	= nil
 	
 	event_is_running = false
@@ -326,9 +349,35 @@ function SpawnCargoVehicle(scenario)
 end
 
 
+RegisterNetEvent('esx_cargodelivery:resetCargo')
+AddEventHandler('esx_cargodelivery:resetCargo', function()
+
+	if event_delivery_blip ~= nil then RemoveBlip(event_delivery_blip) end
+	event_delivery_blip	= nil
+	event_time_passed = 0.0
+	event_is_running = false
+	event_destination = nil
+	event_vehicle = nil
+	event_scenario = nil
+	police_alerted = false
+	local talktodealer = true
+
+end)
 
 
 
+
+RegisterNetEvent('esx_cargodelivery:activateCargo')
+AddEventHandler('esx_cargodelivery:activateCargo', function(cargo_vehicle, cargo_delivery_location)
+
+	drawNotification("Cargo activated.")
+	
+	event_is_running = true
+	event_destination = cargo_delivery_location
+
+
+
+end)
 
 
 function PurchaseCargo(scenario)
@@ -361,28 +410,15 @@ function PurchaseCargo(scenario)
 				
 				event_is_running = true
 
-				math.random(); math.random(); math.random()
-				random_destination = math.random(1, #Config.CargoDeliveryLocations)
-				event_destination = Config.CargoDeliveryLocations[random_destination]
 
 				ESX.SetTimeout(math.random(Config.AlertCopsDelayRangeStart * 1000, Config.AlertCopsDelayRangeEnd * 1000), function()
     				AlertThePolice()
 				end)
 
-				event_delivery_blip	 = AddBlipForCoord(event_destination.x,event_destination.y,event_destination.z)
-				SetBlipSprite(event_delivery_blip,94)
-				SetBlipColour(event_delivery_blip,1)
-				BeginTextCommandSetBlipName("STRING")
-				AddTextComponentString('Cargo Delivery')
-				EndTextCommandSetBlipName(event_delivery_blip)
-				SetBlipAsShortRange(event_delivery_blip,true)
-				SetBlipAsMissionCreatorBlip(event_delivery_blip,true)
-				SetBlipRoute(event_delivery_blip, 1)
-
 			else
 				
 			end
-			end, Config.Scenarios[scenario].CargoCost)
+			end, scenario)
 		
 
 		else 

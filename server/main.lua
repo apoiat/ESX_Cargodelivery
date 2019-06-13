@@ -1,4 +1,5 @@
 ESX = nil
+active_cargo_scenario = -1
 LastDelivery = 0.0
 
 
@@ -21,10 +22,23 @@ function GetCopsOnline()
 end
 
 
+RegisterServerEvent('esx_cargodelivery:activateCargoAllPlayers')
+AddEventHandler('esx_cargodelivery:activateCargoAllPlayers', function(source, vehicle)
+
+	ActivateCargo(source, vehicle)
+
+end)
 
 RegisterServerEvent('esx_cargodelivery:resetEvent')
 AddEventHandler('esx_cargodelivery:resetEvent', function()
 	LastDelivery = 0.0
+	active_cargo_scenario = -1
+
+	local players = ESX.GetPlayers()
+
+	for i=1, #players, 1 do
+		if players[i] ~= source then TriggerClientEvent('esx_cargodelivery:resetCargo', players[i]) end
+	end
 end)
 
 
@@ -39,8 +53,9 @@ end)
 
 
 
-ESX.RegisterServerCallback('esx_cargodelivery:sellCargo', function(source, cb, price)
+ESX.RegisterServerCallback('esx_cargodelivery:sellCargo', function(source, cb)
 	local xPlayer = ESX.GetPlayerFromId(source)
+	local price = Config.Scenarios[scenario].CargoReward
 
 	if Config.UsesBlackMoney then
 	
@@ -53,9 +68,10 @@ ESX.RegisterServerCallback('esx_cargodelivery:sellCargo', function(source, cb, p
 	end
 	
 	TriggerClientEvent('esx:showNotification', source, "You eanred ~r~" .. price .. "~w~ for delivering the cargo.")
+
 	cb(true)
 
-	LastDelivery = 0.0
+	TriggerEvent('esx_cargodelivery:resetEvent')
 
 end)
 
@@ -63,9 +79,10 @@ end)
 
 
 
-ESX.RegisterServerCallback('esx_cargodelivery:buyCargo', function(source, cb, price)
+ESX.RegisterServerCallback('esx_cargodelivery:buyCargo', function(source, cb, scenario)
 	
 	local xPlayer = ESX.GetPlayerFromId(source)
+	local price = Config.Scenarios[scenario].CargoCost
 
 	if (os.time() - LastDelivery) < 200.0 and LastDelivery ~= 0.0 then
 
@@ -73,6 +90,8 @@ ESX.RegisterServerCallback('esx_cargodelivery:buyCargo', function(source, cb, pr
 		cb(false)
 
 	else 
+
+		active_cargo_scenario = scenario
 
 		police_alarm_time = os.time() + math.random(10000, 20000)
 
@@ -83,6 +102,8 @@ ESX.RegisterServerCallback('esx_cargodelivery:buyCargo', function(source, cb, pr
 				xPlayer.removeAccountMoney('black_money', price)
 
 				LastDelivery = os.time()
+
+				TriggerClientEvent('esx_cargodelivery:activateCargo', )
 
 				cb(true)
 			else
@@ -113,3 +134,25 @@ ESX.RegisterServerCallback('esx_cargodelivery:buyCargo', function(source, cb, pr
 	end
 
 end)
+
+
+
+function ActivateCargo(source, vehicle)
+
+	local players = ESX.GetPlayers()
+
+	math.random(); math.random(); math.random()
+	local random_destination = math.random(1, #Config.CargoDeliveryLocations)
+	local event_destination = Config.CargoDeliveryLocations[random_destination]
+
+	for i=1, #players, 1 do
+		if players[i] ~= source then TriggerClientEvent('esx_cargodelivery:activateCargo', players[i], vehicle, event_destination) end
+	end
+
+end
+
+
+
+
+
+

@@ -11,6 +11,8 @@ Config.NPCHash					= 349680864
 Config.AlertCopsDelayRangeStart	= 60
 Config.AlertCopsDelayRangeEnd	= 70
 
+--Enable or disable this if you want to let players to steal the van and get payed for it.
+Config.PlayerCanStealVanEnable 	= true
 --If you want to notify more societies add them here. example { "mafia", "bikers" }
 Config.AlertExtraSocieties 		= { }
 
