@@ -11,7 +11,7 @@ function GetCopsOnline()
 
 	for i=1, #xPlayers, 1 do
 		local xPlayer = ESX.GetPlayerFromId(xPlayers[i])
-		
+
 		if xPlayer.job.name == 'police' then
 			PoliceConnected = PoliceConnected + 1
 		end
@@ -43,16 +43,16 @@ ESX.RegisterServerCallback('esx_cargodelivery:sellCargo', function(source, cb, p
 	local xPlayer = ESX.GetPlayerFromId(source)
 
 	if Config.UsesBlackMoney then
-	
+
 		xPlayer.addAccountMoney('black_money', price)
-	
+
 	else
 
 		xPlayer.addMoney(price)
 
 	end
-	
-	TriggerClientEvent('esx:showNotification', source, "You eanred ~r~" .. price .. "~w~ for delivering the cargo.")
+
+	TriggerClientEvent('esx:showNotification', source, _U('cgdlvserver_you_eanred') .. price .. _U('cgdlvserver_for_delivering_cargo'))
 	cb(true)
 
 	LastDelivery = 0.0
@@ -64,15 +64,15 @@ end)
 
 
 ESX.RegisterServerCallback('esx_cargodelivery:buyCargo', function(source, cb, price)
-	
+
 	local xPlayer = ESX.GetPlayerFromId(source)
 
 	if (os.time() - LastDelivery) < 200.0 and LastDelivery ~= 0.0 then
 
-		TriggerClientEvent('esx:showNotification', source, "Delivery in progress")
+		TriggerClientEvent('esx:showNotification', source, _U('cgdlvserver_delivery_in_progress'))
 		cb(false)
 
-	else 
+	else
 
 		police_alarm_time = os.time() + math.random(10000, 20000)
 
@@ -87,13 +87,13 @@ ESX.RegisterServerCallback('esx_cargodelivery:buyCargo', function(source, cb, pr
 				cb(true)
 			else
 
-				TriggerClientEvent('esx:showNotification', source, "Not enough ~r~black money~w~.")
-	
+				TriggerClientEvent('esx:showNotification', source, _U('cgdlvserver_not_enough_black_money'))
+
 
 				cb(false)
 			end
 
-		else 
+		else
 
 				if xPlayer.getMoney() >= price then
 
@@ -104,8 +104,8 @@ ESX.RegisterServerCallback('esx_cargodelivery:buyCargo', function(source, cb, pr
 				cb(true)
 			else
 
-				TriggerClientEvent('esx:showNotification', source, "Not enough ~r~money~w~.")
-	
+				TriggerClientEvent('esx:showNotification', source, _U('cgdlvserver_not_enough_money'))
+
 				cb(false)
 			end
 		end

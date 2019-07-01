@@ -33,7 +33,7 @@ Citizen.CreateThread(function()
 		SetBlipAsShortRange(blip, true)
 
 		BeginTextCommandSetBlipName("STRING")
-		AddTextComponentString('Cargo Provider')
+		AddTextComponentString(_U('cgdlvclient_cargo_provider'))
 		EndTextCommandSetBlipName(blip)
 end)
 
@@ -47,8 +47,8 @@ local options = {
     height = 0.04,
     scale = 0.4,
     font = 0,
-    menu_title = "NPC",
-    menu_subtitle = "Cargo Dealer",
+    menu_title = _U('cgdlvclient_NPC'),
+    menu_subtitle = _U('cgdlvclient_cargo_dealer'),
     color_r = 0,
     color_g = 128,
     color_b = 255,
@@ -84,12 +84,12 @@ end)
 Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(5)
-		
+
 		local pos = GetEntityCoords(GetPlayerPed(-1), false)
 		local pVehicle = GetVehiclePedIsUsing(GetPlayerPed(-1))
-		local v = Config.CargoProviderLocation 
+		local v = Config.CargoProviderLocation
 			if(Vdist(v.x, v.y, v.z, pos.x, pos.y, pos.z) < 2.0)then
-				DisplayHelpText("Press ~INPUT_CONTEXT~ to interact with ~y~Cargo Dealer")
+				DisplayHelpText(_U('cgdlvclient_press_interact_cargo'))
 				if(IsControlJustReleased(1, 38))then
 						if talktodealer then
 						    Citizen.Wait(500)
@@ -115,8 +115,8 @@ Citizen.CreateThread(function()
 							DeliverCargo()
 						end
 					end
-				else 
-					 DrawMissionText("Get back inside the vehicle!", 1000)
+				else
+					 DrawMissionText(_U('cgdlvclient_get_black_vehicle'), 1000)
 				end
 			end
 	end
@@ -133,17 +133,17 @@ Citizen.CreateThread(function()
 
 						if IsPedDeadOrDying(GetPlayerPed(-1)) then
 							ResetCargo()
-							DisplayMissionFailed('You died!')
+							DisplayMissionFailed(_U('cgdlvclient_you_died'))
 						end
 
 						if GetVehicleEngineHealth(event_vehicle) < 20 and event_vehicle ~= nil then
 							ResetCargo()
-							DisplayMissionFailed('Cargo was seriously damaged.')
+							DisplayMissionFailed(_U('cgdlvclient_cargo_seriously_damaged'))
 						end
 
 						if event_time_passed > 1800 then
 							ResetCargo()
-							DisplayMissionFailed('Cargo Delivery expired.')
+							DisplayMissionFailed(_U('cgdlvclient_cargo_delivery_expired'))
 						end
 
 						event_time_passed = event_time_passed + 5
@@ -158,7 +158,7 @@ function DrawProviderBlip()
 	SetBlipSprite(blip,94)
 	SetBlipColour(blip,1)
 	BeginTextCommandSetBlipName("STRING")
-	AddTextComponentString('Cargo Provider')
+	AddTextComponentString(_U('cgdlvclient_cargo_provider'))
 	EndTextCommandSetBlipName(blip)
 
 end
@@ -172,11 +172,11 @@ end
 
 function CargoMenu()
 	ClearMenu()
-    options.menu_title = "Cargo Dealer"
+    options.menu_title = _U('cgdlvclient_cargo_dealer')
     for i = 1, #Config.Scenarios do
-    	Menu.addButton("Buy Cargo - $" .. Config.Scenarios[i].CargoCost, "PurchaseCargo", i)
+    	Menu.addButton(_U('cgdlvclient_buy_cargo') .. Config.Scenarios[i].CargoCost, "PurchaseCargo", i)
    	end
-    Menu.addButton("Close","CloseMenu",nil) 
+    Menu.addButton(_U('cgdlvclient_close'),"CloseMenu",nil)
 end
 
 
@@ -201,17 +201,17 @@ function AlertThePolice()
 	local PlayerData = ESX.GetPlayerData()
 	local playerPed = PlayerPedId()
 	PedPosition		= GetEntityCoords(playerPed)
-	
+
 	if event_is_running then
-		
+
 		local vehicle_plate = string.char(math.random(65, 90), math.random(65, 90), math.random(65, 90)) .. " " .. math.random(100,999)
 
 		SetVehicleNumberPlateText(event_vehicle, vehicle_plate)
-	
+
 
 		local PlayerCoords = { x = PedPosition.x, y = PedPosition.y, z = PedPosition.z }
 
-    	TriggerServerEvent('esx_addons_gcphone:startCall', 'police', ":anon: Eyes on the Prize! Ipopto oxima me pinakida [ " .. vehicle_plate .. " ] anevenei voria!", PlayerCoords, {
+    	TriggerServerEvent('esx_addons_gcphone:startCall', 'police', _U('cgdlvclient_eyes_on') .. vehicle_plate .. _U('cgdlvclient_anvenei_voria'), PlayerCoords, {
 
 			PlayerCoords = { x = PedPosition.x, y = PedPosition.y, z = PedPosition.z },
 		})
@@ -219,8 +219,8 @@ function AlertThePolice()
     	for i = 1, #Config.AlertExtraSocieties do
 
     		if PlayerData.job.name ~= Config.AlertExtraSocieties[i] then
-    	
-    			TriggerServerEvent('esx_addons_gcphone:startCall', Config.AlertExtraSocieties[i], ":anon: Eyes on the Prize! Ipopto oxima me pinakida [ " .. vehicle_plate .. " ] anevenei voria!", PlayerCoords, {
+
+    			TriggerServerEvent('esx_addons_gcphone:startCall', Config.AlertExtraSocieties[i], _U('cgdlvclient_eyes_on') .. vehicle_plate .. _U('cgdlvclient_anvenei_voria'), PlayerCoords, {
 				PlayerCoords = { x = PedPosition.x, y = PedPosition.y, z = PedPosition.z },
 				})
 
@@ -273,7 +273,7 @@ function DeliverCargo()
 
 			end
 			end, Config.Scenarios[event_scenario].CargoReward)
-		
+
 	local vehicle = GetVehiclePedIsUsing(GetPlayerPed(-1))
 
 	SetEntityAsNoLongerNeeded(vehicle)
@@ -282,7 +282,7 @@ function DeliverCargo()
 
 	RemoveBlip(event_delivery_blip)
 	event_delivery_blip	= nil
-	
+
 	event_is_running = false
 	event_destination = nil
 	event_time_passed = 0.0
@@ -306,8 +306,8 @@ function SpawnCargoVehicle(scenario)
 	while not HasModelLoaded(vehicle) do
 		Wait(1)
 	end
-	
-	colors = table.pack(GetVehicleColours(veh)) 
+
+	colors = table.pack(GetVehicleColours(veh))
 	extra_colors = table.pack(GetVehicleExtraColours(veh))
 	plate = math.random(100, 900)
 	local spawned_car = CreateVehicle(vehicle, Config.Scenarios[scenario].SpawnPoint.x, Config.Scenarios[scenario].SpawnPoint.y, Config.Scenarios[scenario].SpawnPoint.z, false, true)
@@ -325,12 +325,6 @@ function SpawnCargoVehicle(scenario)
 
 end
 
-
-
-
-
-
-
 function PurchaseCargo(scenario)
 
 	local cops_online = 0
@@ -338,27 +332,27 @@ function PurchaseCargo(scenario)
 
 
 	if event_is_running == true then
-		
-		drawNotification("You are already on a cargo delivery mission.")
+
+		drawNotification(_U('cgdlvclient_you_are_already'))
 		goto done
 
 	end
 
 	print("MinCopsOnline: " .. Config.Scenarios[scenario].MinCopsOnline .. " ||  CargoCost:  " .. Config.Scenarios[scenario].CargoCost .. "")
-	
+
 	ESX.TriggerServerCallback('esx_cargodelivery:getCopsOnline', function(police)
 
-		police = police 
+		police = police
 
 		if police >= Config.Scenarios[scenario].MinCopsOnline then
-			
+
 			ESX.TriggerServerCallback('esx_cargodelivery:buyCargo', function(bought)
 			if bought then
 
-				drawNotification("Succesffully purchased cargo.")
+				drawNotification(_U('cgdlvclient_succesffully_purchased_cargo'))
 
 				SpawnCargoVehicle(scenario)
-				
+
 				event_is_running = true
 
 				math.random(); math.random(); math.random()
@@ -373,21 +367,21 @@ function PurchaseCargo(scenario)
 				SetBlipSprite(event_delivery_blip,94)
 				SetBlipColour(event_delivery_blip,1)
 				BeginTextCommandSetBlipName("STRING")
-				AddTextComponentString('Cargo Delivery')
+				AddTextComponentString(_U('cgdlvclient_cargo_delivery'))
 				EndTextCommandSetBlipName(event_delivery_blip)
 				SetBlipAsShortRange(event_delivery_blip,true)
 				SetBlipAsMissionCreatorBlip(event_delivery_blip,true)
 				SetBlipRoute(event_delivery_blip, 1)
 
 			else
-				
+
 			end
 			end, Config.Scenarios[scenario].CargoCost)
-		
 
-		else 
-			drawNotification("You need at least ~b~" .. Config.Scenarios[scenario].MinCopsOnline .. " cops ~w~online.")
-			
+
+		else
+			drawNotification(_U('cgdlvclient_you_need_least') .. Config.Scenarios[scenario].MinCopsOnline .. _U('cgdlvclient_cops_online'))
+
 		end
 
 	end)
@@ -400,7 +394,7 @@ end
 
 function DisplayMissionFailed(label)
 
-	TriggerEvent('esx:showNotification', '~r~Mission Failed: ~w~' .. label)
+	TriggerEvent('esx:showNotification', _U('cgdlvclient_mission_failed') .. label)
 	PlaySound(-1, "Menu_Accept", "Phone_SoundSet_Default", 0, 0, 1)
     Citizen.Wait(300)
     PlaySound(-1, "Menu_Accept", "Phone_SoundSet_Default", 0, 0, 1)
